@@ -18,7 +18,7 @@ export default function Home() {
     { weekname: "week-12 Assignment", weekLink: "/week-12" },
   ];
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24 bg-slate-950">
+    <main className="flex  min-h-screen flex-col items-center justify-between p-24 bg-slate-950">
       <div className="z-10 max-w-5xl w-full items-center justify-between text-sm text-white">
         <h1 className="text-4xl font-bold mb-5  text-white">
           CPRG 306: Web Development 2 - Assignments
