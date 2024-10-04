@@ -26,6 +26,7 @@ function NewItem() {
     setQuantity(1);
     setName("");
     setCategory("produce");
+    setIsEnable(false);
   };
 
   const handleSubmit = (event) => {
