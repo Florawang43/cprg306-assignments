@@ -2,18 +2,18 @@
 import React, { useState } from "react";
 
 export default function CounterTest() {
-  const [count, setCount] = useState(1);
+  const [quantity, setQuantity] = useState(1);
   const increment = () => {
-    setCount(count + 1);
-    if (count > 0) {
-      console.log(count, isEnabled);
+    setQuantity(quantity + 1);
+    if (quantity > 0) {
+      console.log(quantity, isEnabled);
       setIsEnable(true);
     }
   };
   const decrement = () => {
-    setCount(count - 1);
-    if (count <= 2) {
-      console.log(count);
+    setQuantity(quantity - 1);
+    if (quantity <= 2) {
+      console.log(quantity);
       setIsEnable(!isEnabled);
       return;
     }
@@ -24,7 +24,7 @@ export default function CounterTest() {
   return (
     <div className="p-2 m-4 bg-white text-white w-36">
       <div className="flex justify-between">
-        <span className="text-black">{count}</span>
+        <span className="text-black">{quantity}</span>
         <div className="flex">
           <button
             type="button"
