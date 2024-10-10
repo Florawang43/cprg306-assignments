@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Item from "./item";
 import shoppinglist from "./items.json";
 
@@ -12,20 +12,20 @@ function ItemList() {
 
   const [shoppingDict, setShoppingDict] = useState({});
 
-  const handleSortBy = () => {
-    console.log("handleSortBy" + sortBy);
+  useEffect(() => {
+    handleSortBy();
+  }, [sortBy]);
 
+  const handleSortBy = () => {
+    // console.log("handleSortBy" + sortBy);
     const sortedShoppingList = [...shoppingList];
     if (sortBy === "name") {
-      sortedShoppingList.sort((a, b) => b.name.localeCompare(a.name));
+      sortedShoppingList.sort((a, b) => a.name.localeCompare(b.name));
       setShoppingList(sortedShoppingList);
     } else if (sortBy === "category") {
-      console.log("sort category");
-
+      // console.log("sort category");
       sortedShoppingList.sort((a, b) => a.category.localeCompare(b.category));
       setShoppingList(sortedShoppingList);
-    } else if (sortBy === "grouped") {
-      handleGroupList();
     }
   };
 
@@ -36,7 +36,7 @@ function ItemList() {
   };
 
   const handleGroupList = () => {
-    console.log("handleGroupList");
+    // console.log("handleGroupList");
     let sortedShoppingList = [...shoppingList];
     let shoppingDict = sortedShoppingList.reduce((newDict, item) => {
       if (!newDict[item.category]) {
@@ -46,16 +46,16 @@ function ItemList() {
       console.log(newDict);
       return newDict;
     }, {});
-    console.log(shoppingDict);
+    // console.log(shoppingDict);
     setShoppingDict(shoppingDict);
-    console.log(shoppingDict);
+    // console.log(shoppingDict);
   };
 
   return (
     <div className="m-4">
       <h2 className="text-3xl font-bold m-2">Shopping List</h2>
       <div>
-        <labale>Sort by: </labale>
+        <label>Sort by: </label>
         <button
           className="bg-orange-700 p-1 m-2 w-28"
           onClick={() => handleBtnClick("name")}
@@ -92,7 +92,6 @@ function ItemList() {
           : shoppingList.map((item) => {
               return (
                 <div key={item.id}>
-                  <h3 className="capitalize text-xl">{item.category}</h3>
                   <ul>
                     <Item params={item} />
                   </ul>
