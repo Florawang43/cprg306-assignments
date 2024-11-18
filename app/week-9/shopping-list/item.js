@@ -1,14 +1,15 @@
-export default function Item({ key, item, onSelect }) {
-  const { name, quantity, category } = item;
+const Item = ({ name, quantity, category, onSelect }) => {
   return (
     <li
-      className="p-2 m-4 bg-slate-900 max-w-sm"
-      onClick={() => onSelect(name)}
+      className="p-2 bg-gray-700 text-white rounded-lg hover:bg-gray-500 cursor-pointer mb-2 w-96"
+      onClick={onSelect}
     >
-      <h2 className="text-xl font-bold">{name}</h2>
-      <div className="text-sm">
+      <span className="font-bold text-xl">{name}</span>
+      <p className="text-sm">
         Buy {quantity} in {category}
-      </div>
+      </p>
     </li>
   );
-}
+};
+
+export default Item;

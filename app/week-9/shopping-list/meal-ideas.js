@@ -1,68 +1,60 @@
 "use client";
-import { useState, useEffect } from "react";
 
-export default function MealIdeas({ itemName }) {
+import { useEffect, useState } from "react";
+
+const MealIdeas = ({ ingredient }) => {
   const [meals, setMeals] = useState([]);
-  const [ingredient, setIngredient] = useState(itemName);
-
-  const removeEmojis = (text) => {
-    return text
-      .replace(
-        /([\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF])/g,
-        ""
-      )
-      .split(",")[0]
-      .trim();
-  };
 
   const fetchMealIdeas = async (ingredient) => {
-    const sanitizedIngredient = removeEmojis(ingredient);
     try {
       const response = await fetch(
-        `https://www.themealdb.com/api/json/v1/1/filter.php?i=${sanitizedIngredient}`
+        `https://www.themealdb.com/api/json/v1/1/filter.php?i=${ingredient}`
       );
       const data = await response.json();
-      setMeals(data.meals || []);
+      return data.meals;
     } catch (error) {
-      console.error(error);
-      setMeals([]);
+      console.error("Error fetching meal ideas:", error);
+      return [];
     }
   };
 
-  useEffect(() => {
-    if (itemName) {
-      setIngredient(itemName);
-    }
-  }, [itemName]);
+  const loadMealIdeas = async () => {
+    const fetchedMeals = await fetchMealIdeas(ingredient);
+    setMeals(fetchedMeals || []);
+  };
 
   useEffect(() => {
     if (ingredient) {
-      fetchMealIdeas(ingredient);
+      loadMealIdeas();
     }
   }, [ingredient]);
 
   return (
     <div>
-      <h3 class="text-xl font-bold">Meal Ideas</h3>
-      <div>
-        <p>
-          {itemName.length > 0
-            ? meals.length > 0
-              ? `Here are some meal ideas using ${removeEmojis(ingredient)}:`
-              : `No meal ideas found for ${removeEmojis(ingredient)}`
-            : "Select an item to see meal ideas"}
+      {meals.length > 0 ? (
+        <p className="text-white text-xl mb-1">
+          {" "}
+          Here are some meal ideas for {ingredient}
         </p>
-        <ul>
-          {meals.map((meal) => (
+      ) : null}
+      <ul className="space-y-2">
+        {meals && meals.length > 0 ? (
+          meals.map((meal) => (
             <li
               key={meal.idMeal}
-              class="p-2 m-1 max-w-sm bg-slate-900 cursor-pointer"
+              className=" bg-gray-800 p-2 rounded-lg shadow-lg cursor-pointer hover:bg-gray-500"
             >
-              {meal.strMeal}
+              <h3 className=" text-white capitalize">{meal.strMeal}</h3>
             </li>
-          ))}
-        </ul>
-      </div>
+          ))
+        ) : (
+          <p className="text-white text-xl">
+            No meal ideas found for {ingredient}
+          </p>
+        )}
+      </ul>
     </div>
   );
-}
+};
+
+export default MealIdeas;
