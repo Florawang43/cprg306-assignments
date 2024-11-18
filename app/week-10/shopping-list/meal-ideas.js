@@ -1,68 +1,78 @@
 "use client";
+
 import { useState, useEffect } from "react";
 
-export default function MealIdeas({ itemName }) {
-  const [meals, setMeals] = useState([]);
-  const [ingredient, setIngredient] = useState(itemName);
+const fetchMealsIdeas = async (ingredient) => {
+    const response = await fetch(`https://www.themealdb.com/api/json/v1/1/filter.php?i=${ingredient}`);
+    const data = await response.json();
+    return data.meals;
+}
 
-  const removeEmojis = (text) => {
-    return text
-      .replace(
-        /([\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF])/g,
-        ""
-      )
-      .split(",")[0]
-      .trim();
-  };
+const fetchMealDetail = async (idMeal) => {
+    const response = await fetch(`https://www.themealdb.com/api/json/v1/1/lookup.php?i=${idMeal}`);
+    const data = await response.json();
+    return data.meals[0];
+}
 
-  const fetchMealIdeas = async (ingredient) => {
-    const sanitizedIngredient = removeEmojis(ingredient);
-    try {
-      const response = await fetch(
-        `https://www.themealdb.com/api/json/v1/1/filter.php?i=${sanitizedIngredient}`
-      );
-      const data = await response.json();
-      setMeals(data.meals || []);
-    } catch (error) {
-      console.error(error);
-      setMeals([]);
-    }
-  };
+export default function MealIdeas({ingredient}) {
+    const [meals, setMeals] = useState([]);
+    const [idMeal, setIdMeal] = useState("");
+    const [mealDetail, setMealDetail] = useState(null);
 
-  useEffect(() => {
-    if (itemName) {
-      setIngredient(itemName);
-    }
-  }, [itemName]);
+    const loadMealsIdeas = async () => {
+        const meals = await fetchMealsIdeas(ingredient);
+        setMeals(meals);
+    };
 
-  useEffect(() => {
-    if (ingredient) {
-      fetchMealIdeas(ingredient);
-    }
-  }, [ingredient]);
+    const loadMealDetail = async () => {
+        if (idMeal) {
+            const mealData = await fetchMealDetail(idMeal);
+            setMealDetail(mealData);
+        }
+    };
 
-  return (
-    <div>
-      <h3 class="text-xl font-bold">Meal Ideas</h3>
-      <div>
-        <p>
-          {itemName.length > 0
-            ? meals.length > 0
-              ? `Here are some meal ideas using ${removeEmojis(ingredient)}:`
-              : `No meal ideas found for ${removeEmojis(ingredient)}`
-            : "Select an item to see meal ideas"}
-        </p>
-        <ul>
-          {meals.map((meal) => (
-            <li
-              key={meal.idMeal}
-              class="p-2 m-1 max-w-sm bg-slate-900 cursor-pointer"
-            >
-              {meal.strMeal}
-            </li>
-          ))}
-        </ul>
-      </div>
-    </div>
-  );
+    useEffect(() => {
+        loadMealsIdeas();
+    }, [ingredient]);
+
+    useEffect(() => {
+        loadMealDetail();
+    }, [idMeal]);
+
+    return (
+        <div className="border border-gray-50 p-5 rounded-2xl bg-slate-900">
+            <h1 className="font-bold text-3xl m-2 p-1 text-center">Meal Ideas</h1>
+            {ingredient === "" ? (
+                <p>Choose an item to get some meal ideas.</p>
+            ) : !meals ? ( 
+                <p>No meal ideas found for {ingredient}.</p>
+            ) : (
+                <ul>
+                    <p>Here are some meal ideas using {ingredient}:</p>
+                    <br />
+                    {meals.map((meal) => (
+                        <li className="p-2 m-1 bg-slate-800 hover:bg-orange-700" key={meal.idMeal} onClick={() => setIdMeal(meal.idMeal)}>
+                            {meal.strMeal}
+                            {meal.idMeal === idMeal && mealDetail && (
+                                <ul className="text-xs text-gray-400">
+                                    <p className="ml-2">Ingredients needed: </p>
+                                    {Array.from({ length: 20 }, (_, index) => {
+                                        const ingredientKey = `strIngredient${index + 1}`;
+                                        const measureKey = `strMeasure${index + 1}`;
+                                        const ingredient = mealDetail[ingredientKey];
+                                        const measure = mealDetail[measureKey];
+                                        return ingredient ? (
+                                            <li key={ingredientKey} className="ml-7">
+                                                {ingredient} ({measure})
+                                            </li>
+                                        ) : null;
+                                    })}
+                                </ul>
+                            )}
+                        </li>
+                    ))}
+                </ul>
+            )}
+        </div>
+    );
 }

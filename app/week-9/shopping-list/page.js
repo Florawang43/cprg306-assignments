@@ -1,83 +1,65 @@
 "use client";
-import { useUserAuth } from "../_utils/auth-context.js";
-import { useState } from "react";
-import NewItem from "./new-item";
+import { useRouter } from "next/compat/router";
+import { useEffect, useState } from "react";
+import { useUserAuth } from "../_utils/auth-context";
 import ItemList from "./item-list";
 import itemsData from "./items.json";
 import MealIdeas from "./meal-ideas";
+import NewItem from "./new-item";
 
-export default function Page() {
+const Page = () => {
+  const { user, loading } = useUserAuth();
+  const router = useRouter();
   const [items, setItems] = useState(itemsData);
   const [selectedItemName, setSelectedItemName] = useState("");
-  const { user, gitHubSignIn, firebaseSignOut } = useUserAuth();
-  // const [isLogined, setIslogined] = useState(false);
 
-  // useEffect(() => {
-  //   const loadItems = async () => {
-  //     if (user) {
-  //       const itemsList = await getItems(user.uid);
-  //       setItems(itemsList);
-  //     }
-  //   };
-  //   loadItems();
-  // }, [user]);
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push("/week-9"); // Redirect to landing if not logged in
+    }
+  }, [user, loading, router]);
 
-  const handleItemSelect = (name) => {
-    setSelectedItemName(name);
+  if (loading || !user)
+    return (
+      <div className="flex justify-center items-center bg-black h-screen">
+        <div className="w-12 h-12 border-4 border-white border-t-transparent border-solid rounded-full animate-spin"></div>
+      </div>
+    );
+
+  const handleAddItem = (newItem) => {
+    setItems([...items, newItem]);
   };
 
-  const handleAddItem = (item) => {
-    setItems([...items, item]);
-  };
-
-  const [activeButton, setActiveButton] = useState("");
-
-  const handleClick = (sortAttr) => {
-    const sortedItems = [...items].sort((a, b) => {
-      return a[sortAttr].localeCompare(b[sortAttr]);
-    });
-
-    setItems(sortedItems);
-    setActiveButton(sortAttr);
-  };
-
-  const getButtonClass = (sortAttr) => {
-    return activeButton === sortAttr
-      ? "bg-orange-500 p-1 m-2 w-28" // Active style
-      : "bg-orange-700 p-1 m-2 w-28"; // Inactive style
+  const handleItemSelect = (item) => {
+    const cleanedName = item.name
+      .split(",")[0]
+      .replace(/([\u2700-\u27BF]|[\uE000-\uF8FF]|[\u2011-\u26FF])/g, "")
+      .trim();
+    setSelectedItemName(cleanedName);
   };
 
   return (
-    <div className="flex">
-      {user === null ? (
-        <h1>Please Login!</h1>
-      ) : (
+    <main className="p-4 bg-gray-900 ">
+      <h1 className="text-3xl font-bold text-white mb-4">Shopping List</h1>
+      <div className="flex">
         <div>
-          <div className="flex-1 max-w-sm m-2">
-            <NewItem onAddItem={handleAddItem} />
-            <div>
-              <label for="sort">Sort by: </label>
-              <button
-                className={getButtonClass("name")}
-                onClick={() => handleClick("name")}
-              >
-                Name
-              </button>
-              <button
-                className={getButtonClass("category")}
-                onClick={() => handleClick("category")}
-              >
-                Category
-              </button>
-            </div>
-            <ItemList items={items} onItemSelect={handleItemSelect} />
-          </div>
-
-          <div className="flex-1 max-w-sm m-2">
-            <MealIdeas itemName={selectedItemName} />
-          </div>
+          <NewItem onAddItem={handleAddItem} />
+          <ItemList items={items} onItemSelect={handleItemSelect} />
         </div>
-      )}
-    </div>
+        <div className="ml-4 mt-6">
+          <h1 className="text-3xl font-bold text-white">Meal Ideas</h1>
+          {/* Conditional Rendering: If an item is selected, show meal ideas */}
+          {selectedItemName ? (
+            <MealIdeas ingredient={selectedItemName} />
+          ) : (
+            <h2 className="text-xl text-white">
+              Select an item to see meal ideas
+            </h2>
+          )}
+        </div>
+      </div>
+    </main>
   );
-}
+};
+
+export default Page;

@@ -1,60 +1,67 @@
 "use client";
-import Link from "next/link";
+
+import { useRouter } from "next/compat/router";
+import { useEffect } from "react";
 import { useUserAuth } from "./_utils/auth-context";
 
-export default function SignInPage() {
-  const { user, gitHubSignIn, firebaseSignOut } = useUserAuth();
+export default function LandingPage() {
+  const { user, loading, gitHubSignIn, firebaseSignOut } = useUserAuth();
+  const router = useRouter();
 
-  async function handleSignIn() {
-    try {
-      await gitHubSignIn();
-    } catch (error) {
-      console.log(error);
+  useEffect(() => {
+    if (user) {
+      if (router) {
+        router.push("/week-9/profile");
+      } else {
+        console.error("Router object is not available.");
+      }
     }
-  }
+  }, [user, router]);
 
-  async function handleSignOut() {
-    try {
-      await firebaseSignOut();
-    } catch (error) {
-      console.log(error);
-    }
-  }
+  if (loading)
+    return (
+      <div className="flex justify-center items-center bg-black h-screen">
+        <div className="w-12 h-12 border-4 border-white border-t-transparent border-solid rounded-full animate-spin"></div>
+      </div>
+    );
+
   return (
-    <main className="m-5 flex-row items-center justify-center ">
-      <header>
-        <h1 className=" text-3xl text-center">Week-9</h1>
-      </header>
-      {user ? (
-        <div className="max-w-sm rounded overflow-hidden shadow-lg p-6 justify-center bg-slate-900">
-          <p>Welcome</p>
-          <p>{user.displayName} click on the link to view your shopping list</p>
-          <div>
-            <Link
-              href="week-9/shopping-list"
-              className=" text-blue-600 underline"
-            >
-              Shopping List
-            </Link>
-          </div>
-
+    <div>
+      {!user ? (
+        <div className="flex flex-col justify-center items-center h-screen bg-black">
+          <p className="text-white text-4xl text-bold">
+            Sorry, you cannot see the contents of this page without
+            authentication.
+          </p>
           <button
-            className="text-lg text-white bg-blue-600 px-2 py-1 mt-4"
-            onClick={handleSignOut}
+            className="text-orange-600 text-4xl text-bold hover:text-green-400 hover:underline "
+            onClick={gitHubSignIn}
           >
-            Sign out
+            Login with GitHub
           </button>
         </div>
       ) : (
-        <div>
+        <div className="flex flex-col p-4 h-screen justify-center items-center bg-black">
+          <div className="flex text-white text-3xl text-bold">
+            <span>Logged in as </span>
+            <p className="text-green-400 ml-3 text-3xl text-bold">
+              {user.displayName} ({user.email}).
+            </p>
+          </div>
           <button
-            className="text-lg text-white bg-blue-600 px-2 py-1 mt-4"
-            onClick={handleSignIn}
+            className="text-white text-3xl text-bold hover:text-orange-400 hover:underline"
+            onClick={firebaseSignOut}
           >
-            Sign in
+            Logout
           </button>
+          <a
+            className="text-white text-3xl text-bold hover:text-orange-400 hover:underline"
+            href="/week-9/shopping-list"
+          >
+            Continue to your Shopping List
+          </a>
         </div>
       )}
-    </main>
+    </div>
   );
 }
